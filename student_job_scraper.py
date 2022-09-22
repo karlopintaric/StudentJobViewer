@@ -6,8 +6,6 @@ import numpy as np
 import os
 import sys
 
-print("Starting download...")
-
 application_path = os.path.dirname(sys.executable)
 
 website = "http://www.sczg.unizg.hr/student-servis/ponuda-poslova/"
@@ -32,31 +30,31 @@ job_df = pd.DataFrame()
 
 for link in links:
     driver.get(link)
-    
+
     job_site = driver.find_elements(
-        by="xpath", 
+        by="xpath",
         value='//div[@class="newsItem"]'
         )
 
     for element in job_site:
-            
+
         category = element.find_element(
-            by="xpath", 
+            by="xpath",
             value='./h1'
             ).text
         job_listings = element.find_elements(
-            by="xpath", 
+            by="xpath",
             value='./div/p'
             )
 
         df_temp = pd.concat(
             [pd.DataFrame(
-                {"full_desc": [job.text], "category": [category]}) for job in job_listings], 
+                {"full_desc": [job.text], "category": [category]}) for job in job_listings],
                 ignore_index=True
                 )
-        
+
         job_df = pd.concat([job_df, df_temp], ignore_index=True)
-        
+
     print("■", end="")
 
 driver.quit()
@@ -69,16 +67,14 @@ job_df = job_df.apply(
         )
 
 job_df["full_desc"] = job_df["full_desc"].replace(
-    r"^[^\d]", 
-    np.nan, 
+    r"^[^\d]",
+    np.nan,
     regex=True
     )
 
 job_df = job_df.dropna().reset_index(drop=True)
 
-
-zgzup_mjesta = pd.read_csv("zgzup_mjesta.csv", encoding="utf8")
-town_list = list(zgzup_mjesta["Mjesto"])
+town_list = ["Velika Gorica", "Samobor", "Zaprešić", "Sveta Nedelja", "Dugo Selo", "Jastrebarsko", "Sveti Ivan Zelina", "Zabok", "Oroslavlje", "Donja stubica"]
 
 def find_town(row):
 
@@ -113,3 +109,4 @@ job_df.to_csv(f"{application_path}/student_job_data.csv")
 
 print("\nDownload Complete!\n")
 input("Press enter to continue")
+sys.exit()
