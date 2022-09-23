@@ -1,4 +1,4 @@
-# studentski_poslovi
+# Student job viewer
 
 MOTIVATION: Job listings on Student servis Zagreb are a mess and are scattered on different sites.
 
