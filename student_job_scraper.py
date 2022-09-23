@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import os
 import sys
+import time
 
 application_path = os.path.dirname(sys.executable)
 
@@ -20,14 +21,18 @@ driver = webdriver.Chrome(service=service, options=options)
 driver.get(website)
 
 
+# Get all links of sites where different job ads are posted
 elements = driver.find_elements(by="xpath", value='(//div[@class="content"]/h2/a | //div[@class="content"]/h2/strong/a)')
 links = [elem.get_attribute("href") for elem in elements]
 
 
-print("Downloading...")
+print("\nDownloading...")
+time.sleep(1)
 
 job_df = pd.DataFrame()
 
+
+# Iterate through each link and save ads in a dataframe
 for link in links:
     driver.get(link)
 
@@ -49,24 +54,25 @@ for link in links:
 
         df_temp = pd.concat(
             [pd.DataFrame(
-                {"full_desc": [job.text], "category": [category]}) for job in job_listings],
+                {"full_ad": [job.text], "category": [category]}) for job in job_listings],
                 ignore_index=True
                 )
 
         job_df = pd.concat([job_df, df_temp], ignore_index=True)
 
-    print("■", end="")
+    print("■", end="", flush=True)
 
 driver.quit()
 
 
+# Clean dataframe
 job_df = job_df.apply(
     lambda x: x.str.strip()
     ).replace(
         "", np.nan
         )
 
-job_df["full_desc"] = job_df["full_desc"].replace(
+job_df["full_ad"] = job_df["full_ad"].replace(
     r"^[^\d]",
     np.nan,
     regex=True
@@ -74,39 +80,44 @@ job_df["full_desc"] = job_df["full_desc"].replace(
 
 job_df = job_df.dropna().reset_index(drop=True)
 
+# Towns near Zagreb
 town_list = ["Velika Gorica", "Samobor", "Zaprešić", "Sveta Nedelja", "Dugo Selo", "Jastrebarsko", "Sveti Ivan Zelina", "Zabok", "Oroslavlje", "Donja stubica"]
 
 def find_town(row):
 
-    if row["mjesto"] is np.nan:
+    if row["town"] is np.nan:
         for town in town_list:
-            if town in row["full_desc"]:
-                row["mjesto"] = town
+            if town in row["full_ad"]:
+                row["town"] = town
     return row
 
 
-job_df["naslov"] = job_df["full_desc"].str.extract("(?:\d{4}\s?/)(.+?[^od])\. ")
+# Use regex to extract information from job ad
+job_df["title"] = job_df["full_ad"].str.extract("(?:\d{4}\s?/)(.+?[^od])\. ")
 
-job_df["radno_vrijeme"] = job_df["full_desc"].str.extract("(?<=vrijeme:)\s*(.+?)\. ")
+job_df["radno_vrijeme"] = job_df["full_ad"].str.extract("(?<=vrijeme:)\s*(.+?)\. ")
 
-job_df["satnica/kn"] = job_df["full_desc"].str.extract("(\d{1,4}[,\.]?\d{,2}\s*)(?:[Kk]u?[nN][a]?|HRK)(?=[h/\.]*)")
-job_df["satnica/kn"] = job_df["satnica/kn"].replace(",", ".", regex=True)
-job_df["satnica/kn"] = pd.to_numeric(job_df["satnica/kn"])
+job_df["hourly_rate"] = job_df["full_ad"].str.extract("(\d{1,4}[,\.]?\d{,2}\s*)(?:[Kk]u?[nN][a]?|HRK)(?=[h/\.]*)")
+job_df["hourly_rate"] = job_df["hourly_rate"].replace(",", ".", regex=True)
+job_df["hourly_rate"] = pd.to_numeric(job_df["hourly_rate"])
 
-job_df["mjesto"] = job_df["full_desc"].str.extract("(Zagreb)")
+job_df["town"] = job_df["full_ad"].str.extract("(Zagreb)")
 job_df = job_df.apply(find_town, axis=1)
 
-job_df["ulica"] = job_df["full_desc"].str.extract("([A-ZŠČĆŽĐ][a-zščćžđ]+(?:\s[A-ZŠČĆŽĐ]?[a-zščćžđ]+){,2}?\s\d+\w?)[^\.]*?Zagreb")
-ulica_other = job_df["full_desc"].str.extract("Zagreb[^.]*?([A-ZŠČĆŽĐ][a-zščćžđ]+(?:\s[A-ZŠČĆŽĐ]?[a-zščćžđ]+)*?\s\d+\w?)")
-job_df["ulica"] = job_df["ulica"].fillna(ulica_other[0])
+job_df["street adress"] = job_df["full_ad"].str.extract("([A-ZŠČĆŽĐ][a-zščćžđ]+(?:\s[A-ZŠČĆŽĐ]?[a-zščćžđ]+){,2}?\s\d+\w?)[^\.]*?Zagreb")
+ulica_other = job_df["full_ad"].str.extract("Zagreb[^.]*?([A-ZŠČĆŽĐ][a-zščćžđ]+(?:\s[A-ZŠČĆŽĐ]?[a-zščćžđ]+)*?\s\d+\w?)")
+job_df["street adress"] = job_df["street adress"].fillna(ulica_other[0])
 
-job_df["kontakt"] = job_df["full_desc"].str.extract("(?:[kK]ontakt|[pP]rijav\w+).{,10}:(.*?)(?:\.\s|$)")
+job_df["contact_info"] = job_df["full_ad"].str.extract("(?:[kK]ontakt|[pP]rijav\w+).{,10}:(.*?)(?:\.\s|$)")
 
-job_df["vjestine"] = job_df["full_desc"].str.extract("(?:[zZ]nanj|[vV]ještin|[Pp]otreb]\w+).{,10}:(.*?)(?:\.\s)")
+job_df["skills"] = job_df["full_ad"].str.extract("(?:[zZ]nanj|[vV]ještin|[Pp]otreb]\w+).{,10}:(.*?)(?:\.\s)")
 
 
 job_df.to_csv(f"{application_path}/student_job_data.csv")
 
 print("\nDownload Complete!\n")
-input("Press enter to continue")
+
+input("\nPlease refresh your excel workbook.")
+time.sleep(1)
+
 sys.exit()
