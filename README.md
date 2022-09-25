@@ -13,7 +13,12 @@
 ### GOAL: Extract relevant information from job postings and create filters to find a desired job more easily.
 
 ### RESULT:
-![image](https://user-images.githubusercontent.com/96391450/192008107-f8cc6a34-072c-48a7-93a1-344eca80fe8f.png)
+
+
+<img src="https://user-images.githubusercontent.com/96391450/192135022-eaf7effe-3941-43c7-bd8e-4c5da4ca22ff.png" width="100%" height="auto"/>
+
+![image](https://user-images.githubusercontent.com/96391450/192135132-e1d12fe1-84f3-4d04-8184-804be768492e.png)
+
 ![image](https://user-images.githubusercontent.com/96391450/192008906-3efa06bd-b570-45b4-bf8b-21c80a191400.png)
 
 
