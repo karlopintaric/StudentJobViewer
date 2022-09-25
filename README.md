@@ -17,3 +17,7 @@
 ![image](https://user-images.githubusercontent.com/96391450/192008906-3efa06bd-b570-45b4-bf8b-21c80a191400.png)
 
 
+#### *THE WORKBOOK USES MACROS SO MAY NEED TO UNBLOCK THE FILE:*
+
+<img src="https://user-images.githubusercontent.com/96391450/192134886-b444f736-796c-4b0e-9028-28af1551303c.png" width="25%" height="auto"/>
+
