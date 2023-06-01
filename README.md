@@ -1,5 +1,5 @@
 # Student job viewer
-###### *WORK IN PROGRESS*
+###### *OUTDATED*
 
 
 ##### *Requirements: Google Chrome v105*
